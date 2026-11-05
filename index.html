@@ -161,7 +161,6 @@
   .card h3 a:hover { color: var(--accent); }
   .card p { color: var(--text-dim); font-size: 15px; }
   .card .meta { color: var(--text-faint); font-size: 12.5px; margin-bottom: 10px; }
-  .card .card-tags { margin: -6px 0 10px; line-height: 1.8; }
   .card .tag {
     display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent);
     background: var(--accent-soft); padding: 4px 12px; border-radius: 999px; margin-bottom: 14px;
@@ -480,7 +479,6 @@ function cardHtml(p) {
   return `
   <div class="card reveal">
     <div class="meta">${p.date || ""}</div>
-    <div class="card-tags">${tagsHtml(p)}</div>
     <h3><a href="#/blog/${p.slug}">${p.title}</a></h3>
     <p>${p.desc || ""}</p>
   </div>`;
