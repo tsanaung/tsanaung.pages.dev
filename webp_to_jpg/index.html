@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="my">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebP → JPG Converter</title>
+    <style>
+      :root {
+        font-family: "Padauk", "Myanmar Text", system-ui, sans-serif;
+        background: #f1f5f9;
+        color: #0f172a;
+      }
+      body { margin: 0; min-height: 100vh; }
+      .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 60px; }
+      h1 { font-size: 1.5rem; text-align: center; }
+      .drop {
+        border: 2px dashed #64748b;
+        border-radius: 14px;
+        background: #fff;
+        padding: 36px 20px;
+        text-align: center;
+        transition: .2s;
+        cursor: pointer;
+      }
+      .drop.over { background: #e0f2fe; border-color: #0284c7; }
+      .drop p { margin: 6px 0; color: #475569; }
+      .btn {
+        display: inline-block; margin-top: 10px;
+        background: #0284c7; color: #fff; border: none;
+        padding: 10px 22px; border-radius: 8px; font-size: 1rem;
+        cursor: pointer;
+      }
+      .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+      .btn.green { background: #16a34a; }
+      .opts {
+        margin: 16px 0; background: #fff; border-radius: 12px;
+        padding: 14px 18px; display: flex; flex-wrap: wrap;
+        gap: 16px; align-items: center; font-size: .95rem;
+      }
+      .opts label { display: flex; align-items: center; gap: 8px; }
+      .progress {
+        height: 10px; background: #e2e8f0; border-radius: 6px;
+        overflow: hidden; margin: 14px 0; display: none;
+      }
+      .progress > div { height: 100%; width: 0; background: #0284c7; transition: width .2s; }
+      table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: .9rem; }
+      th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; word-break: break-all; }
+      th { background: #f8fafc; }
+      td.status-ok { color: #16a34a; font-weight: 600; }
+      td.status-fail { color: #dc2626; font-weight: 600; }
+      td.actions button {
+        background: none; border: 1px solid #cbd5e1; border-radius: 6px;
+        padding: 4px 10px; cursor: pointer; font-size: .8rem;
+      }
+      .toolbar { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+      .hint { font-size: .85rem; color: #64748b; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>🖼️ WebP → JPG Converter</h1>
+
+      <div class="drop" id="drop">
+        <p><strong>Folder တစ်ခုလုံး</strong> ရွေးပါ — ထဲမှာရှိတဲ့ WebP ဖိုင်အားလုံးကို JPG အဖြစ်ပြောင်းပေးမည်</p>
+        <p>ဒီနေရာမှာ folder ကို drag & drop လုပ်လည်း ရသည်</p>
+        <button class="btn" id="pickBtn" type="button">📁 Folder ရွေးမည်</button>
+        <input type="file" id="folderInput" webkitdirectory multiple hidden />
+      </div>
+
+      <div class="opts">
+        <label>JPG အရည်အသွေး (Quality)
+          <input type="range" id="quality" min="0.5" max="1" step="0.05" value="0.9" />
+          <span id="qVal">90%</span>
+        </label>
+        <label><input type="checkbox" id="keepName" checked /> မူလဖိုင်နာမည်ကိုပဲ သုံးမည် (extension ပြောင်းမည်)</label>
+      </div>
+
+      <div class="progress" id="progress"><div id="bar"></div></div>
+
+      <div class="toolbar">
+        <button class="btn green" id="convertBtn" type="button" disabled>⚡ Convert စတင်မည်</button>
+        <button class="btn" id="downloadAllBtn" type="button" disabled>⬇️ JPG အားလုံးကို Download</button>
+        <button class="btn" id="zipBtn" type="button" disabled>🗜️ ZIP အဖြစ် Download</button>
+      </div>
+
+      <table id="resultTable" hidden>
+        <thead>
+          <tr><th>ဖိုင်နာမည်</th><th>သောခ</th><th>Download</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <p class="hint">Note — None of your files are stored on the server. <br/>
+      Developed by Tsan Aung &copy; 2013 - 2026 </p>
+    </div>
+
+    <script>
+      const drop = document.getElementById("drop");
+      const pickBtn = document.getElementById("pickBtn");
+      const folderInput = document.getElementById("folderInput");
+      const quality = document.getElementById("quality");
+      const qVal = document.getElementById("qVal");
+      const keepName = document.getElementById("keepName");
+      const convertBtn = document.getElementById("convertBtn");
+      const downloadAllBtn = document.getElementById("downloadAllBtn");
+      const zipBtn = document.getElementById("zipBtn");
+      const progress = document.getElementById("progress");
+      const bar = document.getElementById("bar");
+      const resultTable = document.getElementById("resultTable");
+      const tbody = document.getElementById("tbody");
+
+      let webpFiles = [];
+      let converted = []; // {name, blob, rowEl}
+
+      quality.addEventListener("input", () => {
+        qVal.textContent = Math.round(quality.value * 100) + "%";
+      });
+
+      pickBtn.addEventListener("click", e => { e.stopPropagation(); folderInput.click(); });
+      drop.addEventListener("click", () => folderInput.click());
+      folderInput.addEventListener("change", () => acceptFiles(folderInput.files));
+
+      ["dragenter", "dragover"].forEach(ev =>
+        drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); })
+      );
+      ["dragleave", "drop"].forEach(ev =>
+        drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); })
+      );
+      drop.addEventListener("drop", e => acceptFiles(e.dataTransfer.files));
+
+      function acceptFiles(fileList) {
+        const files = Array.from(fileList);
+        webpFiles = files.filter(f => /\.webp$/i.test(f.name) || f.type === "image/webp");
+        const skipped = files.length - webpFiles.length;
+        convertBtn.disabled = webpFiles.length === 0;
+        converted = [];
+        tbody.innerHTML = "";
+        resultTable.hidden = true;
+        downloadAllBtn.disabled = true;
+        zipBtn.disabled = true;
+        if (webpFiles.length === 0) {
+          alert("WebP ဖိုင် မတွေ့ပါ။ WebP ပါတဲ့ folder ကို ရွေးပါ။");
+          return;
+        }
+        if (skipped > 0) console.log(skipped + " non-WebP files skipped");
+        convertBtn.textContent = "⚡ Convert စတင်မည် (" + webpFiles.length + " ဖိုင်)";
+      }
+
+      function toJpgName(name) {
+        if (keepName.checked) return name.replace(/\.webp$/i, "") + ".jpg";
+        return "jpg_" + Date.now() + "_" + Math.floor(Math.random() * 1000) + ".jpg";
+      }
+
+      convertBtn.addEventListener("click", async () => {
+        if (webpFiles.length === 0) return;
+        convertBtn.disabled = true;
+        downloadAllBtn.disabled = true;
+        zipBtn.disabled = true;
+        progress.style.display = "block";
+        resultTable.hidden = false;
+        converted = [];
+        tbody.innerHTML = "";
+        bar.style.width = "0%";
+
+        let ok = 0, fail = 0;
+        for (let i = 0; i < webpFiles.length; i++) {
+          const f = webpFiles[i];
+          const tr = document.createElement("tr");
+          const tdName = document.createElement("td"); tdName.textContent = f.name;
+          const tdStatus = document.createElement("td"); tdStatus.textContent = "…";
+          const tdAct = document.createElement("td");
+          tr.append(tdName, tdStatus, tdAct);
+          tbody.appendChild(tr);
+
+          try {
+            const blob = await convertOne(f, parseFloat(quality.value));
+            const jpgName = toJpgName(f.name);
+            converted.push({ name: jpgName, blob, tdAct });
+            tdStatus.textContent = "အောင်မြင် ✔";
+            tdStatus.className = "status-ok";
+            ok++;
+          } catch (err) {
+            tdStatus.textContent = "ကျရှုံး ✘ (" + err.message + ")";
+            tdStatus.className = "status-fail";
+            fail++;
+          }
+          bar.style.width = Math.round(((i + 1) / webpFiles.length) * 100) + "%";
+        }
+
+        addDownloadButtons();
+        downloadAllBtn.disabled = converted.length === 0;
+        zipBtn.disabled = converted.length === 0;
+        convertBtn.disabled = false;
+        convertBtn.textContent = "⚡ ထပ်မံ Convert (" + webpFiles.length + " ဖိုင်) — အောင်: " + ok + " / ကျ: " + fail;
+      });
+
+      async function convertOne(file, q) {
+        const bmp = await createImageBitmap(file);
+        const canvas = document.createElement("canvas");
+        canvas.width = bmp.width;
+        canvas.height = bmp.height;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff"; // transparency → ဖြူ
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bmp, 0, 0);
+        bmp.close();
+        return await new Promise((res, rej) =>
+          canvas.toBlob(b => b ? res(b) : rej(new Error("JPG မဖြစ်နိုင်ပါ")), "image/jpeg", q)
+        );
+      }
+
+      function addDownloadButtons() {
+        converted.forEach(c => {
+          c.tdAct.innerHTML = "";
+          c.tdAct.appendChild(makeBtn(c));
+        });
+      }
+
+      function makeBtn(c) {
+        const b = document.createElement("button");
+        b.textContent = "⬇ ချမည်";
+        b.addEventListener("click", () => triggerDownload(c));
+        return b;
+      }
+
+      function triggerDownload(c) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(c.blob);
+        a.download = c.name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      }
+
+      downloadAllBtn.addEventListener("click", async () => {
+        for (const c of converted) {
+          triggerDownload(c);
+          await new Promise(r => setTimeout(r, 400));
+        }
+      });
+
+      // ---------- ZIP (stored, no compression) ----------
+      const CRC_TABLE = (() => {
+        const t = new Uint32Array(256);
+        for (let n = 0; n < 256; n++) {
+          let c = n;
+          for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+          t[n] = c >>> 0;
+        }
+        return t;
+      })();
+      function crc32(bytes) {
+        let c = 0xFFFFFFFF;
+        for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+        return (c ^ 0xFFFFFFFF) >>> 0;
+      }
+
+      zipBtn.addEventListener("click", async () => {
+        if (converted.length === 0) return;
+        zipBtn.disabled = true;
+        zipBtn.textContent = "🗜️ ZIP ပြုလုပ်နေသည်…";
+        try {
+          const enc = new TextEncoder();
+          const chunks = [];
+          const central = [];
+          let offset = 0;
+
+          for (const c of converted) {
+            const data = new Uint8Array(await c.blob.arrayBuffer());
+            const nameBytes = enc.encode(c.name);
+            const crc = crc32(data);
+            const dosTime = 0, dosDate = ((new Date().getFullYear() - 1980) << 9) | ((new Date().getMonth() + 1) << 5) | new Date().getDate();
+
+            const local = new Uint8Array(30 + nameBytes.length);
+            const lv = new DataView(local.buffer);
+            lv.setUint32(0, 0x04034b50, true);
+            lv.setUint16(4, 20, true);        // version
+            lv.setUint16(6, 0x0800, true);    // UTF-8 names
+            lv.setUint16(8, 0, true);         // stored
+            lv.setUint16(10, dosTime, true);
+            lv.setUint16(12, dosDate, true);
+            lv.setUint32(14, crc, true);
+            lv.setUint32(18, data.length, true);
+            lv.setUint32(22, data.length, true);
+            lv.setUint16(26, nameBytes.length, true);
+            lv.setUint16(28, 0, true);
+            local.set(nameBytes, 30);
+
+            const cen = new Uint8Array(46 + nameBytes.length);
+            const cv = new DataView(cen.buffer);
+            cv.setUint32(0, 0x02014b50, true);
+            cv.setUint16(4, 20, true);
+            cv.setUint16(6, 20, true);
+            cv.setUint16(8, 0x0800, true);
+            cv.setUint16(10, 0, true);
+            cv.setUint16(12, dosTime, true);
+            cv.setUint16(14, dosDate, true);
+            cv.setUint32(16, crc, true);
+            cv.setUint32(20, data.length, true);
+            cv.setUint32(24, data.length, true);
+            cv.setUint16(28, nameBytes.length, true);
+            cv.setUint32(42, offset, true);
+            cen.set(nameBytes, 46);
+
+            chunks.push(local, data);
+            central.push(cen);
+            offset += local.length + data.length;
+          }
+
+          let centralSize = 0;
+          central.forEach(c => centralSize += c.length);
+          const end = new Uint8Array(22);
+          const ev = new DataView(end.buffer);
+          ev.setUint32(0, 0x06054b50, true);
+          ev.setUint16(8, converted.length, true);
+          ev.setUint16(10, converted.length, true);
+          ev.setUint32(12, centralSize, true);
+          ev.setUint32(16, offset, true);
+          chunks.push(...central, end);
+
+          const zipBlob = new Blob(chunks, { type: "application/zip" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(zipBlob);
+          a.download = "webp-to-jpg_" + Date.now() + ".zip";
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        } catch (err) {
+          alert("ZIP ပြုလုပ်ရာမှာ ချို့ယွင်းသည်: " + err.message);
+        }
+        zipBtn.disabled = false;
+        zipBtn.textContent = "🗜️ ZIP အဖြစ် Download";
+      });
+    </script>
+  </body>
+</html>
