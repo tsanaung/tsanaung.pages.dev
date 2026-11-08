@@ -7,10 +7,10 @@
     "tags": ["meta", "intro"]
   },
   {
-    "slug": "deploying-to-cloudflare",
-    "title": "Deploying a Static Site to Cloudflare Pages",
-    "date": "Nov 4, 2026",
-    "desc": "From GitHub repo to live site in under 5 minutes.",
-    "tags": ["cloudflare", "devops"]
+    "slug": "webp_jpg_converter",
+    "title": "Webp to JPEG batch image converter",
+    "date": "Nov 8, 2026",
+    "desc": "Free & OpenSource batch image converter",
+    "tags": ["converter", "image", "tool"]
   }
 ]
