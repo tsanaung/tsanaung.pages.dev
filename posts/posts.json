@@ -14,7 +14,7 @@
     "tags": ["converter", "image", "tool"]
   },
   {
-    "slug": "web-to-deb",
+    "slug": "web2deb",
     "title": "Web app into a deb package builder",
     "date": "Nov 10, 2026",
     "desc": "Free & OpenSource web-to-deb package builder",
