@@ -12,5 +12,12 @@
     "date": "Nov 8, 2026",
     "desc": "Free & OpenSource batch image converter",
     "tags": ["converter", "image", "tool"]
+  },
+  {
+    "slug": "web-to-deb",
+    "title": "Web app into a deb package builder",
+    "date": "Nov 10, 2026",
+    "desc": "Free & OpenSource web-to-deb package builder",
+    "tags": ["web","node.js","electron","linux", "debian", "tool"]
   }
 ]
