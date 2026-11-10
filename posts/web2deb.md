@@ -1,25 +1,55 @@
-# .Webp to JPEG Converter
+## Web to Deb Builder
+A desktop application built with Electron to convert web applications into Debian package (.deb) installers for Linux distributions (such as Debian, Ubuntu, and Cutefish OS).  
 
-This is a standalone HTML version. If you wish to create an actual `.exe` file, you would need to package this HTML using Electron or Tauri.
 
-## Features included:
-- 📁 Select an entire folder (drag-and-drop is also supported)
-- Converts all WebP files within the folder to JPG
-- Adjustable quality (50%–100%); choose between original filenames or new ones
-- Download files individually or all at once
-- Everything is processed locally on your device (web browser)
-— no files are uploaded to any server
+## Features
+Simple and intuitive desktop interface  
+Package web apps into native .deb installers  
+Built with Electron, HTML5, and vanilla JavaScript
 
-## How to use: 
-- Download the HTML file and open it in your browser (Chrome/Edge). 
-- Simply select a folder, click "Convert," and then click "Download."
-- In addition, you can download your files as zip.
+```
+Project Structure
+├── index.html          # Main application UI layout
+├── renderer.js         # Frontend interactive logic
+├── main.js             # Electron main process
+├── package.json        # Dependencies and build configuration
+├── package-lock.json   # Exact dependency lockfile
+├── .gitignore          # Ignores build artifacts and node_modules
+└── README.md           # Documentation
+```
 
-## Licinese 
-- Free & OpenSource
+## Prerequisites
+Ensure you have the following installed on your Linux system:  
 
-## Use Online
-- Demo: https://tsanaung.pages.dev/webp_to_jpg/
-- SourceCode: https://raw.githubusercontent.com/tsanaung/tsanaung.pages.dev/refs/heads/main/webp_to_jpg/index.html
 
-> Feel comfort to contact me @fb/tsanaung.dev
+Node.js (v18 or newer recommended)  
+
+npm (comes with Node.js)  
+
+dpkg-deb / build tools (typically pre-installed on Debian/Ubuntu):  
+
+``` sudo apt update && sudo apt install dpkg binutils fakeroot -y ```  
+
+Getting Started  
+
+Clone the repository  
+
+``` git clone https://github.com/tsanaung/web_to_deb.git ```  
+
+``` cd web_to_deb ```  
+
+Install dependencies  
+
+``` npm install ```  
+
+Run the application  
+
+``` npm start ```  
+
+## Building & Packaging
+To create release bundles or Debian installers, run:  
+
+``` npm run build ```  
+(Check package.json for customized scripts and output directories)
+
+## License MIT
