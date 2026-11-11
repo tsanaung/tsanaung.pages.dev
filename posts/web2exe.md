@@ -49,6 +49,64 @@ Before running the converter or compiling generated apps, ensure you have:
 ## 🛠️ Installation & Setup
 
 1. **Clone the repository:**
-   ```bash
+   ```shell
    git clone https://github.com/tsanaung/web2exe.git
    cd web2exe
+   ```
+2. **Install required dependencies***
+```shell
+  pip install pywebview pyinstaller pillow
+```
+## 🚀 How to Use
+
+### Step 1: Launch the converter UI
+Run the builder tool:
+```shell
+  python web2exe.py
+```
+
+### Step 2: Configure your app
+1. App Name: Enter the name for your desktop application.
+2. Web App Link: Provide the target URL (e.g., https://myapp.com or local server URL).
+3. App Icon: Select a .png image file for the app icon (optional but recommended).
+4. Menu Items (Optional): Click ＋ Add Menu Item, set a label, and browse for a local .html file.
+5. Click 🚀 Generate Windows App Project and choose a destination folder.
+
+### Step 3: Test the Generated App
+Open the generated project directory and run:
+```shell
+  cd <output-folder>/<YourAppName>
+  python app.py
+```
+
+### Step 4: Build Standalone Windows Executable (.exe)
+Compile the project into a single, redistributable .exe file:
+```shell
+  pyinstaller --noconfirm --onefile --windowed --icon=assets/icon.ico --add-data "menu.json;." --add-data "menu;menu" --add-data "assets;assets" app.py
+```
+(If you did not provide an icon, omit the --icon=assets/icon.ico flag).
+
+Once compilation finishes, find your standalone executable in the dist/ folder:
+```shell
+dist/
+└── app.exe
+```
+
+### 📁 Generated Project Structure
+```shell
+YourAppName/
+├── assets/
+│   ├── icon.png          # App icon source
+│   └── icon.ico          # Auto-generated Windows icon
+├── menu/
+│   └── menu_1_about.html # Custom bundled HTML pages
+├── menu.json             # Menu configuration mapping
+├── app.py                # Main executable runtime script
+└── README.txt            # Quick build notes & instructions
+```
+
+### 🤝 Contributing
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
+
+### 📄 License
+This project is open-source and licensed under the MIT License.
