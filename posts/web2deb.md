@@ -3,11 +3,11 @@ A desktop application built with Electron to convert web applications into Debia
 
 
 ## Features
-Simple and intuitive desktop interface  
-Package web apps into native .deb installers  
-Built with Electron, HTML5, and vanilla JavaScript
+Simple and intuitive desktop interface  <br>
+Package web apps into native .deb installers  <br>
+Built with Electron, HTML5, and vanilla JavaScript <br>
 
-```
+```bash
 Project Structure
 ├── index.html          # Main application UI layout
 ├── renderer.js         # Frontend interactive logic
@@ -19,37 +19,45 @@ Project Structure
 ```
 
 ## Prerequisites
-Ensure you have the following installed on your Linux system:  
-
-
-Node.js (v18 or newer recommended)  
-
-npm (comes with Node.js)  
-
+Ensure you have the following installed on your Linux system:  <br>
+Node.js (v18 or newer recommended)  <br>
+npm (comes with Node.js)  <br>
 dpkg-deb / build tools (typically pre-installed on Debian/Ubuntu):  
 
-``` sudo apt update && sudo apt install dpkg binutils fakeroot -y ```  
+```bash
+ sudo apt update && sudo apt install dpkg binutils fakeroot -y 
+```  
 
-Getting Started  
+## Getting Started  
 
 Clone the repository  
 
-``` git clone https://github.com/tsanaung/web_to_deb.git ```  
+```bash
+ git clone https://github.com/tsanaung/web_to_deb.git 
+```  
 
-``` cd web_to_deb ```  
+```bash
+ cd web_to_deb 
+```  
 
 Install dependencies  
 
-``` npm install ```  
+```bash
+ npm install 
+```  
 
 Run the application  
 
-``` npm start ```  
+```bash
+ npm start 
+```  
 
 ## Building & Packaging
 To create release bundles or Debian installers, run:  
 
-``` npm run build ```  
+```bash
+ npm run build 
+```  
 (Check package.json for customized scripts and output directories)
 
 ## License MIT
