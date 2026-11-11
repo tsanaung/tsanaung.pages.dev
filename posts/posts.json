@@ -1,9 +1,9 @@
 [
   {
-    "slug": "hello-world",
-    "title": "Hello, World — My First Post",
-    "date": "Nov 5, 2026",
-    "desc": "Why I built this site and what it will be about.",
+    "slug": "web2exe",
+    "title": "Convert Web Apps to Windows Desktop Apps",
+    "date": "Nov 11, 2026",
+    "desc": "Free & OpenSource web-to-exe package builder",
     "tags": ["meta", "intro"]
   },
   {
@@ -19,5 +19,12 @@
     "date": "Nov 10, 2026",
     "desc": "Free & OpenSource web-to-deb package builder",
     "tags": ["web","node.js","electron","linux", "debian", "tool"]
+  },
+  {
+    "slug": "hello-world",
+    "title": "Hello, World — My First Post",
+    "date": "Nov 5, 2026",
+    "desc": "Why I built this site and what it will be about.",
+    "tags": ["meta", "intro"]
   }
 ]
